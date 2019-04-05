@@ -1,22 +1,20 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using Microsoft.VisualBasic;
 using Microsoft.VisualBasic.Devices;
 using System.Management;
 using System.IO;
 using System.Linq;
-using System.Windows.Documents;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Windows;
 using System.Runtime.CompilerServices;
 
 namespace OliinykLab5.Models
 {
     internal class ProcessInfo: INotifyPropertyChanged
     {
-        private Process _process;
+        private PerformanceCounter _cpuv;
+        private PerformanceCounter _ramv;
+        private readonly Process _process;
         private readonly string _name;
         private readonly int _id;
         private bool _isActive;
@@ -27,7 +25,7 @@ namespace OliinykLab5.Models
         private readonly string _userName;
         private readonly string _fileName;
         private readonly string _filePath;
-        private readonly DateTime _startTime;
+        private readonly string _startTime;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -41,32 +39,28 @@ namespace OliinykLab5.Models
         {
             try
             {
+                
+
                 _process = process;
                 _name = process.ProcessName;
                 _id = process.Id;
-                _isActive = process.Responding;
-                _threadsQuontity = process.Threads.Count;
-
                 _userName = GetUserName();
-               _filePath = _process.MainModule.FileName;
-              //MessageBox.Show(FileName);
-               //_fileName = Name + ".exe";
+                _filePath = _process.MainModule.FileName;
                 FileInfo fi = new FileInfo(_filePath);
                 _fileName = fi.Name;
-                _startTime = process.StartTime;
+                _startTime = process.StartTime.ToString();
+
+                _isActive = IsActive = Process.GetProcesses().Where(p => p.Id == Id).Count() > 0;
+                _threadsQuontity = process.Threads.Count;
                 CalculateRAMAndCPU();
                 
             }
-            catch (System.ComponentModel.Win32Exception e)
-            {
-                //_startTime = new DateTime(2020, 12, 12);
-            }
             catch (Exception e)
             {
-            //    _startTime= new DateTime(2020, 12, 12);
             }
 
         }
+        
 
         private string GetUserName()
         {
@@ -80,32 +74,39 @@ namespace OliinykLab5.Models
             else return result;
         }
 
-        internal void CalculateRAMAndCPU()
+        internal void Update()
         {
-            PerformanceCounter cpu = new PerformanceCounter("Process", "% Processor Time", Name, true);
-            PerformanceCounter ramv = new PerformanceCounter("Process", "Private Bytes", Name, true);
-            //PerformanceCounter ram = new PerformanceCounter("Process", "% Private Bytes", Name, true);
+            CalculateRAMAndCPU();
+            IsActive = Process.GetProcesses().Where(p=>p.Id==Id).Count()>0;
+            ThreadsQuontity = _process.Threads.Count;
+        }
 
-            //double processCPU = Convert.ToDouble(cpu.NextValue());
+        private void CalculateRAMAndCPU()
+        {
+            if (_cpuv==null) _cpuv = new PerformanceCounter("Process", "% Processor Time", Name, true);
+            if (_ramv == null) _ramv = new PerformanceCounter("Process", "Private Bytes", Name, true);
+
             try
             {
-                CPU = Math.Round((cpu.NextValue() / Environment.ProcessorCount), 3);
+                CPU = Math.Round((_cpuv.NextValue() / Environment.ProcessorCount), 1);
             }
-            catch (System.InvalidOperationException e)
+            catch (Exception e)
             {
-                CPU = 0;
             }
             
-             //CPU = Math.Round(cpu.NextValue(), 3);
-            RAMV = Math.Round((ramv.NextValue()/1048576), 3);
+             try
+             {
+                RAMV = Math.Round((_ramv.NextValue() / 1048576), 1);
+                Computer myComputer = new Computer();
+                double allRAM = myComputer.Info.TotalVirtualMemory;
+                RAM = Math.Round((_ramv.NextValue()* 100/allRAM), 1);
+            
+             }
+             catch (Exception e)
+             {
 
-            Computer myComputer = new Computer();
-            double allRAM = myComputer.Info.TotalVirtualMemory;
-            RAM = Math.Round((ramv.NextValue()* 100/allRAM), 3);
-            IsActive = _process.Responding;
-
-            cpu.Dispose();
-            ramv.Dispose();
+             }
+            
         }
 
         internal ObservableCollection<ProcessModule> Modules()
@@ -162,7 +163,7 @@ namespace OliinykLab5.Models
             private set
             {
                 _isActive = value; 
-                OnPropertyChanged();
+                OnPropertyChanged("IsActive");
             }
         }
 
@@ -172,7 +173,7 @@ namespace OliinykLab5.Models
             private set
             {
                 _cpu = value;
-                OnPropertyChanged();
+                OnPropertyChanged("CPU");
             }
         }
 
@@ -182,7 +183,7 @@ namespace OliinykLab5.Models
             private set
             {
                 _ram = value;
-                OnPropertyChanged();
+                OnPropertyChanged("RAM");
             }
         }
 
@@ -192,7 +193,7 @@ namespace OliinykLab5.Models
             private set
             {
                 _ramV = value;
-                OnPropertyChanged();
+                OnPropertyChanged("RAMV");
             }
         }
 
@@ -202,7 +203,7 @@ namespace OliinykLab5.Models
             private set
             {
                 _threadsQuontity = value;
-                OnPropertyChanged();
+                OnPropertyChanged("ThreadsQuontity");
             }
         }
 
@@ -221,11 +222,15 @@ namespace OliinykLab5.Models
             get { return _filePath; }
         }
 
-        public DateTime StartTime
+        public string StartTime
         {
             get { return _startTime; }
         }
 
+        public Process Process
+        {
+            get { return _process; }
+        }
        
     }
 }

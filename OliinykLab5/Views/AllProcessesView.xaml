@@ -8,30 +8,43 @@
              d:DesignHeight="700" d:DesignWidth="900">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="5*"></RowDefinition>
             <RowDefinition Height="55*"></RowDefinition>
-            <RowDefinition Height="45*"></RowDefinition>
+            <RowDefinition Height="40*"></RowDefinition>
         </Grid.RowDefinitions>
-        <DataGrid ItemsSource="{Binding Processes, Mode=OneWay}" AutoGenerateColumns="False" IsSynchronizedWithCurrentItem="True"
-                  SelectionUnit="FullRow" SelectedItem="{Binding SelectedProcess}" IsReadOnly="True">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10*"></ColumnDefinition>
+            <ColumnDefinition Width="15*"></ColumnDefinition>
+            <ColumnDefinition Width="20*"></ColumnDefinition>
+            <ColumnDefinition Width="35*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Label Grid.Row="0" Grid.Column="0"  Content="Sorting: " FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+        <CheckBox Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" IsEnabled="{Binding IsEnabled}"
+                  IsChecked="{Binding IsDescending}" Content="Descending"></CheckBox>
+        <ComboBox  Margin="10 5 10 5" Height="25" Grid.Row="0" Grid.Column="2" SelectedItem="{Binding SelectedProperty}" 
+                   ItemsSource="{Binding PropertiesList, Mode=OneWay}" IsEditable="False"></ComboBox>
+
+        <DataGrid Grid.Row ="1" Grid.ColumnSpan="4" ItemsSource="{Binding Processes, Mode=OneWay}" AutoGenerateColumns="False"
+                  SelectionUnit="FullRow" SelectedItem="{Binding SelectedProcess, Mode=TwoWay}" IsReadOnly="True" CanUserSortColumns="False">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Id" Binding="{Binding Id}"></DataGridTextColumn>
                 <DataGridTextColumn Header="Name" Binding="{Binding Name}"></DataGridTextColumn>
                 <DataGridTextColumn Header="Is active" Binding="{Binding IsActive}"></DataGridTextColumn>
-                <DataGridTextColumn Header="CPU" Binding="{Binding CPU}"></DataGridTextColumn>
-                <DataGridTextColumn Header="RAM" Binding="{Binding RAM}"></DataGridTextColumn>
-                <DataGridTextColumn Header="RAMV" Binding="{Binding RAMV}"></DataGridTextColumn>
-                <DataGridTextColumn Header="steam" Binding="{Binding ThreadsQuontity}"></DataGridTextColumn>
+                <DataGridTextColumn Header="CPU %" Binding="{Binding CPU}"></DataGridTextColumn>
+                <DataGridTextColumn Header="RAM %" Binding="{Binding RAM}"></DataGridTextColumn>
+                <DataGridTextColumn Header="RAM" Binding="{Binding RAMV}"></DataGridTextColumn>
+                <DataGridTextColumn Header="Threads" Binding="{Binding ThreadsQuontity}"></DataGridTextColumn>
                 <DataGridTextColumn Header="User name" Binding="{Binding UserName}"></DataGridTextColumn>
                 <DataGridTextColumn Header="Sourse name" Binding="{Binding FileName}"></DataGridTextColumn>
                 <DataGridTextColumn Header="Sourse" Binding="{Binding FilePath}"></DataGridTextColumn>
                 <DataGridTextColumn Header="Start time" Binding="{Binding StartTime}"></DataGridTextColumn>
             </DataGrid.Columns>
         </DataGrid>
-        <Grid Row="1">
+        <Grid Row="2" Grid.ColumnSpan="4">
              <Grid.RowDefinitions>
                 <RowDefinition Height="12*"></RowDefinition>
-                <RowDefinition Height="8*"></RowDefinition>
-                <RowDefinition Height="75*"></RowDefinition>
+                <RowDefinition Height="10*"></RowDefinition>
+                <RowDefinition Height="73*"></RowDefinition>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="50*"></ColumnDefinition>
@@ -40,19 +53,19 @@
                 <ColumnDefinition Width="25*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <TextBlock Text="{Binding CurrentProcess, Mode=OneWay}" Margin="5" VerticalAlignment="Center" FontWeight="Bold"></TextBlock>
-            <Button Grid.Column="1" Grid.ColumnSpan="2" Content="Kill" Margin="10 5 10 5" Height="25" Command="{Binding KillProcess}" VerticalAlignment="Center"></Button>
-            <Button Grid.Column="3" Content="Open folder" Margin="10 5 10 5" Height="25" Command="{Binding OpenFolder}" VerticalAlignment="Center"></Button>
-            <Label Grid.Row ="1" Grid.ColumnSpan="2" HorizontalAlignment="Center" Content="Modules: " VerticalAlignment="Top"></Label>
-            <DataGrid Grid.Row="2" Margin="5" Grid.ColumnSpan="2" ItemsSource="{Binding SelectedProcessModules, Mode=OneWay}" AutoGenerateColumns="False" IsSynchronizedWithCurrentItem="True"
-                      SelectionUnit="FullRow">
+            <Button Grid.Column="1" Grid.ColumnSpan="2" Content="Kill" Margin="10 5 10 5" Height="25" Command="{Binding KillProcessCommand}" VerticalAlignment="Center"></Button>
+            <Button Grid.Column="3" Content="Open folder" Margin="10 5 10 5" Height="25" Command="{Binding OpenFolderCommand}" VerticalAlignment="Center"></Button>
+            <Label Grid.Row ="1" Grid.ColumnSpan="2" FontWeight="Bold" HorizontalAlignment="Center" Content="Modules: " VerticalAlignment="Top"></Label>
+            <DataGrid Grid.Row="2" Margin="5" Grid.ColumnSpan="2" ItemsSource="{Binding SelectedProcessModules, Mode=OneWay}" AutoGenerateColumns="False" 
+                      SelectionUnit="FullRow" IsReadOnly="True">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Name" Binding="{Binding ModuleName}"></DataGridTextColumn>
                     <DataGridTextColumn Header="Path to file" Binding="{Binding FileName}"></DataGridTextColumn>
                 </DataGrid.Columns>
             </DataGrid>
-            <Label Grid.Row ="1" Grid.ColumnSpan="2" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Top" Content="Threads: "></Label>
+            <Label Grid.Row ="1" Grid.ColumnSpan="2" Grid.Column="2" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Top" Content="Threads: "></Label>
             <DataGrid Grid.Row="2" Margin="5" Grid.ColumnSpan="2" Grid.Column="2" ItemsSource="{Binding SelectedProcessThreads, Mode=OneWay}" AutoGenerateColumns="False" IsSynchronizedWithCurrentItem="True"
-                      SelectionUnit="FullRow">
+                      SelectionUnit="FullRow" IsReadOnly="True">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Id" Binding="{Binding Id}"></DataGridTextColumn>
                     <DataGridTextColumn Header="State" Binding="{Binding ThreadState}"></DataGridTextColumn>
