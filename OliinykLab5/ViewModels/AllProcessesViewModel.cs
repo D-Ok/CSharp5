@@ -226,19 +226,17 @@ namespace OliinykLab5.ViewModels
                     SelectedProcessThreads = _selectedProcess.Threads();
                     SelectedProcessModules = _selectedProcess.Modules();
                 }
-
-                List<ProcessInfo> fresh = _processes.ToList();
-                foreach (var process in fresh)
+                SortAndRefreshList(null);
+                foreach (var process in Processes)
                 {
                     process.Update();
-                    
                 }
-                SortAndRefreshList(fresh);
+                SortAndRefreshList(null);
 
                 if (_token.IsCancellationRequested)
                     break;
                
-                for (int j = 0; j < 4; j++)
+                for (int j = 0; j < 3; j++)
                 {
                     Thread.Sleep(500);
                     if (_token.IsCancellationRequested)
@@ -289,58 +287,58 @@ namespace OliinykLab5.ViewModels
 
         private void SortAndRefreshList(List<ProcessInfo> list)
         {
-           
-            IEnumerable<ProcessInfo> sorted = list;
-            if (sorted == null) sorted = Processes.ToList();
-            
-            switch (SelectedProperty)
-            {
-                case "Id":
-                    if (IsDescending) sorted = sorted.OrderByDescending(p => p.Id);
-                    else sorted = sorted.OrderBy(p => p.Id);
-                    break;
-                case "Name":
-                    if (IsDescending) sorted = sorted.OrderByDescending(p => p.Name);
-                    else sorted = sorted.OrderBy(p => p.Name);
-                    break;
-                case "Is active":
-                    if (IsDescending) sorted = sorted.OrderByDescending(p => p.IsActive);
-                    else sorted = sorted.OrderBy(p => p.IsActive);
-                    break;
-                case "CPU":
-                    if (IsDescending) sorted = sorted.OrderByDescending(p => p.CPU);
-                    else sorted = sorted.OrderBy(p => p.CPU);
-                    break;
-                case "RAM":
-                    if (IsDescending) sorted = sorted.OrderByDescending(p => p.RAM);
-                    else sorted = sorted.OrderBy(p => p.RAM);
-                    break;
-                case "Threads":
-                    if (IsDescending) sorted = sorted.OrderByDescending(p => p.ThreadsQuontity);
-                    else sorted = sorted.OrderBy(p => p.ThreadsQuontity);
-                    break;
-                case "User name":
-                    if (IsDescending) sorted = sorted.OrderByDescending(p => p.UserName);
-                    else sorted = sorted.OrderBy(p => p.UserName);
-                    break;
-                case "Sourse name":
-                    if (IsDescending) sorted = sorted.OrderByDescending(p => p.FileName);
-                    else sorted = sorted.OrderBy(p => p.FileName);
-                    break;
-                case "Sourse":
-                    if (IsDescending) sorted = sorted.OrderByDescending(p => p.FilePath);
-                    else sorted = sorted.OrderBy(p => p.FilePath);
-                    break;
-                case "Start time":
-                    if (IsDescending) sorted = sorted.OrderByDescending(p => p.StartTime);
-                    else sorted = sorted.OrderBy(p => p.StartTime);
-                    break;
-                default: break;
-            }
-            ProcessInfo curProcess = SelectedProcess;
-            
-            Processes = new ObservableCollection<ProcessInfo>(sorted);
-            SelectedProcess = (Processes.Contains(curProcess)) ?  curProcess :  null;
+                IEnumerable<ProcessInfo> sorted = list;
+                if (sorted == null) sorted = Processes.ToList();
+
+                switch (SelectedProperty)
+                {
+                    case "Id":
+                        if (IsDescending) sorted = sorted.OrderByDescending(p => p.Id);
+                        else sorted = sorted.OrderBy(p => p.Id);
+                        break;
+                    case "Name":
+                        if (IsDescending) sorted = sorted.OrderByDescending(p => p.Name);
+                        else sorted = sorted.OrderBy(p => p.Name);
+                        break;
+                    case "Is active":
+                        if (IsDescending) sorted = sorted.OrderByDescending(p => p.IsActive);
+                        else sorted = sorted.OrderBy(p => p.IsActive);
+                        break;
+                    case "CPU":
+                        if (IsDescending) sorted = sorted.OrderByDescending(p => p.CPU);
+                        else sorted = sorted.OrderBy(p => p.CPU);
+                        break;
+                    case "RAM":
+                        if (IsDescending) sorted = sorted.OrderByDescending(p => p.RAM);
+                        else sorted = sorted.OrderBy(p => p.RAM);
+                        break;
+                    case "Threads":
+                        if (IsDescending) sorted = sorted.OrderByDescending(p => p.ThreadsQuontity);
+                        else sorted = sorted.OrderBy(p => p.ThreadsQuontity);
+                        break;
+                    case "User name":
+                        if (IsDescending) sorted = sorted.OrderByDescending(p => p.UserName);
+                        else sorted = sorted.OrderBy(p => p.UserName);
+                        break;
+                    case "Sourse name":
+                        if (IsDescending) sorted = sorted.OrderByDescending(p => p.FileName);
+                        else sorted = sorted.OrderBy(p => p.FileName);
+                        break;
+                    case "Sourse":
+                        if (IsDescending) sorted = sorted.OrderByDescending(p => p.FilePath);
+                        else sorted = sorted.OrderBy(p => p.FilePath);
+                        break;
+                    case "Start time":
+                        if (IsDescending) sorted = sorted.OrderByDescending(p => p.StartTime);
+                        else sorted = sorted.OrderBy(p => p.StartTime);
+                        break;
+                    default: break;
+                }
+
+                ProcessInfo curProcess = SelectedProcess;
+
+                Processes = new ObservableCollection<ProcessInfo>(sorted);
+                SelectedProcess = (Processes.Contains(curProcess)) ? curProcess : null;
         }
 
         

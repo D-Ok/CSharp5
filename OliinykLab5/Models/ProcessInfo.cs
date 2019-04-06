@@ -37,26 +37,27 @@ namespace OliinykLab5.Models
 
         public ProcessInfo(Process process)
         {
-            try
-            {
-                
-
                 _process = process;
                 _name = process.ProcessName;
                 _id = process.Id;
                 _userName = GetUserName();
-                _filePath = _process.MainModule.FileName;
-                FileInfo fi = new FileInfo(_filePath);
-                _fileName = fi.Name;
-                _startTime = process.StartTime.ToString();
-
+                
                 _isActive = IsActive = Process.GetProcesses().Where(p => p.Id == Id).Count() > 0;
                 _threadsQuontity = process.Threads.Count;
                 CalculateRAMAndCPU();
-                
-            }
-            catch (Exception e)
+
+            try
             {
+                _startTime = process.StartTime.ToString();
+                _filePath = _process.MainModule.FileName;
+                FileInfo fi = new FileInfo(_filePath);
+                _fileName = fi.Name;
+            }
+            catch (Exception)
+            {
+                _filePath = "No access";
+                _fileName = "No access";
+                _startTime = "No access";
             }
 
         }
@@ -64,14 +65,22 @@ namespace OliinykLab5.Models
 
         private string GetUserName()
         {
-            var sq = new ObjectQuery("Select * from Win32_Process Where ProcessID = '" + Id + "'");
-            var searcher = new ManagementObjectSearcher(sq);
-            var process = searcher.Get().Cast<ManagementObject>().First();
-            var ownerInfo = new string[2];
-            process.InvokeMethod("GetOwner", ownerInfo);
-            string result = ownerInfo[0];
-            if (String.IsNullOrEmpty(result)) return "No information";
-            else return result;
+            try
+            {
+                var sq = new ObjectQuery("Select * from Win32_Process Where ProcessID = '" + Id + "'");
+                var searcher = new ManagementObjectSearcher(sq);
+                var process = searcher.Get().Cast<ManagementObject>().First();
+                var ownerInfo = new string[2];
+                process.InvokeMethod("GetOwner", ownerInfo);
+                string result = ownerInfo[0];
+                if (String.IsNullOrEmpty(result)) return "No information";
+                else return result;
+            }
+            catch (InvalidOperationException)
+            {
+                return "No information";
+            }
+           
         }
 
         internal void Update()
@@ -90,8 +99,9 @@ namespace OliinykLab5.Models
             {
                 CPU = Math.Round((_cpuv.NextValue() / Environment.ProcessorCount), 1);
             }
-            catch (Exception e)
+            catch (InvalidOperationException)
             {
+                CPU = 0;
             }
             
              try
@@ -102,11 +112,12 @@ namespace OliinykLab5.Models
                 RAM = Math.Round((_ramv.NextValue()* 100/allRAM), 1);
             
              }
-             catch (Exception e)
-             {
+            catch (InvalidOperationException)
+            {
+                RAMV = 0;
+                RAM = 0;
+            }
 
-             }
-            
         }
 
         internal ObservableCollection<ProcessModule> Modules()
@@ -115,16 +126,15 @@ namespace OliinykLab5.Models
                 ObservableCollection<ProcessModule> result = new ObservableCollection<ProcessModule>();
                 try
                 {
-                    foreach (System.Diagnostics.ProcessModule modul in _process.Modules)
+                    foreach (ProcessModule modul in _process.Modules)
                     {
                         result.Add(modul);
                     }
                  }
-                catch (Exception e)
+                catch (Exception)
                 {
                 }
-                
-           
+
             return result;
         }
 
@@ -134,12 +144,12 @@ namespace OliinykLab5.Models
             ObservableCollection<ProcessThread> result = new ObservableCollection<ProcessThread>();
             try
             {
-                foreach (System.Diagnostics.ProcessThread thread in _process.Threads)
+                foreach (ProcessThread thread in _process.Threads)
                 {
                     result.Add(thread);
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
             }
             
